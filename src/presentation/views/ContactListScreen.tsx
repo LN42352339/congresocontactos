@@ -66,7 +66,7 @@ const ContactListScreen = () => {
     );
 
     return () => unsubscribe();
-  }, []);
+  }, [navigation]);
 
   // Filtrado en tiempo real
   useEffect(() => {
