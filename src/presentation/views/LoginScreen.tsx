@@ -67,7 +67,10 @@ const LoginScreen = () => {
         text1: 'Bienvenido',
         text2: 'Has iniciado sesión correctamente',
       });
-      navigation.replace('ContactList');
+
+      //navigation.replace('Dashboard');
+
+       navigation.replace('ContactList');
     } catch (error: any) {
       console.log('🛠️ Código de error Firebase:', error.code);
       const ref = doc(db, 'contactos', phoneNumber);

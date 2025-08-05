@@ -1,0 +1,98 @@
+{
+  "images": [
+    {
+      "idiom": "iphone",
+      "size": "201x.pngx201x.png",
+      "scale": "1x",
+      "filename": "Icon-20pt@1x.png"
+    },
+    {
+      "idiom": "iphone",
+      "size": "202x.pngx202x.png",
+      "scale": "2x",
+      "filename": "Icon-20pt@2x.png"
+    },
+    {
+      "idiom": "iphone",
+      "size": "203x.pngx203x.png",
+      "scale": "3x",
+      "filename": "Icon-20pt@3x.png"
+    },
+    {
+      "idiom": "iphone",
+      "size": "291x.pngx291x.png",
+      "scale": "1x",
+      "filename": "Icon-29pt@1x.png"
+    },
+    {
+      "idiom": "iphone",
+      "size": "292x.pngx292x.png",
+      "scale": "2x",
+      "filename": "Icon-29pt@2x.png"
+    },
+    {
+      "idiom": "iphone",
+      "size": "293x.pngx293x.png",
+      "scale": "3x",
+      "filename": "Icon-29pt@3x.png"
+    },
+    {
+      "idiom": "iphone",
+      "size": "401x.pngx401x.png",
+      "scale": "1x",
+      "filename": "Icon-40pt@1x.png"
+    },
+    {
+      "idiom": "iphone",
+      "size": "402x.pngx402x.png",
+      "scale": "2x",
+      "filename": "Icon-40pt@2x.png"
+    },
+    {
+      "idiom": "iphone",
+      "size": "403x.pngx403x.png",
+      "scale": "3x",
+      "filename": "Icon-40pt@3x.png"
+    },
+    {
+      "idiom": "iphone",
+      "size": "602x.pngx602x.png",
+      "scale": "2x",
+      "filename": "Icon-60pt@2x.png"
+    },
+    {
+      "idiom": "iphone",
+      "size": "603x.pngx603x.png",
+      "scale": "3x",
+      "filename": "Icon-60pt@3x.png"
+    },
+    {
+      "idiom": "iphone",
+      "size": "761x.pngx761x.png",
+      "scale": "1x",
+      "filename": "Icon-76pt@1x.png"
+    },
+    {
+      "idiom": "iphone",
+      "size": "762x.pngx762x.png",
+      "scale": "2x",
+      "filename": "Icon-76pt@2x.png"
+    },
+    {
+      "idiom": "iphone",
+      "size": "83_52x.pngx83_52x.png",
+      "scale": "2x",
+      "filename": "Icon-83_5pt@2x.png"
+    },
+    {
+      "idiom": "iphone",
+      "size": "10241x.pngx10241x.png",
+      "scale": "1x",
+      "filename": "Icon-1024pt@1x.png"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}

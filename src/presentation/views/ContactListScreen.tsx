@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,18 +9,19 @@ import {
   Alert,
   TextInput,
 } from 'react-native';
-import {db, auth} from '../../core/config/firebase'; // ✅ conexión centralizada a Firebase
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { db, auth } from '../../core/config/firebase';
 import {
   collection,
   onSnapshot,
   QuerySnapshot,
   DocumentData,
 } from 'firebase/firestore';
-import {onAuthStateChanged, signOut} from 'firebase/auth';
-import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../navigation/AppNavigator';
-import {Contacto} from '../../domain/entities/Contacto';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../navigation/AppNavigator';
+import { Contacto } from '../../domain/entities/Contacto';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 type NavigationProp = NativeStackNavigationProp<
@@ -34,21 +35,17 @@ const ContactListScreen = () => {
   const [busqueda, setBusqueda] = useState('');
   const [filtrados, setFiltrados] = useState<Contacto[]>([]);
 
-  // Redirige al login si no hay usuario autenticado
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, user => {
       if (!user) {
         navigation.replace('Login');
       }
     });
-
     return unsubscribeAuth;
   }, [navigation]);
 
-  // Escucha cambios en la colección de contactos
   useEffect(() => {
     const contactosRef = collection(db, 'contactos');
-
     const unsubscribe = onSnapshot(
       contactosRef,
       (snapshot: QuerySnapshot<DocumentData>) => {
@@ -64,11 +61,9 @@ const ContactListScreen = () => {
         console.error(error);
       },
     );
-
     return () => unsubscribe();
   }, [navigation]);
 
-  // Filtrado en tiempo real
   useEffect(() => {
     const texto = busqueda.toLowerCase();
     const resultados = contactos.filter(contacto =>
@@ -111,7 +106,7 @@ const ContactListScreen = () => {
     }
   };
 
-  const renderItem = ({item}: {item: Contacto}) => (
+  const renderItem = ({ item }: { item: Contacto }) => (
     <View style={styles.card}>
       <Text style={styles.name}>
         {[
@@ -145,9 +140,11 @@ const ContactListScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerIcon}>📇</Text>
+        
+        <Icon name="user" size={26} color="#ffffff" style={styles.headerIcon} />
+
         <Text style={styles.headerTitle}>Directorio del Congreso</Text>
       </View>
 
@@ -163,6 +160,10 @@ const ContactListScreen = () => {
         placeholderTextColor="#888"
       />
 
+      <Text style={styles.totalText}>
+        Total de contactos: {filtrados.length}
+      </Text>
+
       {filtrados.length === 0 ? (
         <Text style={styles.emptyText}>No hay contactos encontrados.</Text>
       ) : (
@@ -173,7 +174,7 @@ const ContactListScreen = () => {
           showsVerticalScrollIndicator={false}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -189,10 +190,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 16,
     paddingVertical: 12,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#a30000',
     borderRadius: 16,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 4,
@@ -204,7 +205,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#a30000',
+    color: '#fdfefe',
   },
   logoutBtn: {
     alignSelf: 'flex-end',
@@ -220,9 +221,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 14,
     borderRadius: 14,
-    marginBottom: 20,
+    marginBottom: 10,
     fontSize: 16,
     color: '#333333',
+  },
+  totalText: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 10,
+    color: '#555',
+    fontWeight: '600',
   },
   card: {
     backgroundColor: '#ffffff',
@@ -232,7 +240,7 @@ const styles = StyleSheet.create({
     borderColor: '#e0e0e0',
     borderWidth: 1,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 1},
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.06,
     shadowRadius: 4,
     elevation: 2,
