@@ -1,79 +1,297 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 📱 Congreso Contactos
 
-# Getting Started
+Proyecto **React Native (TypeScript)** para **Android** y **iOS**, conectado a **Firebase (Auth, Firestore, Storage)**.
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+> Este README está pensado para que **funcione en cualquier PC o Mac** al descargar el **ZIP** desde GitHub o clonar el repositorio.
 
-## Step 1: Start the Metro Server
+---
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
+## 🧭 Contenido
 
-To start Metro, run the following command from the _root_ of your React Native project:
+* [Requisitos](#-requisitos)
+* [Tecnologías](#-tecnologías)
+* [Estructura del proyecto](#-estructura-del-proyecto)
+* [Configuración de Firebase](#-configuración-de-firebase)
+* [Instalación (ZIP o Git)](#-instalación-zip-o-git)
+* [Configuración por sistema operativo](#-configuración-por-sistema-operativo)
+
+  * [Windows](#windows)
+  * [macOS](#macos)
+  * [Linux](#linux)
+* [Comandos útiles (scripts)](#-comandos-útiles-scripts)
+* [Ejecutar la app](#-ejecutar-la-app)
+* [Solución de problemas (FAQ)](#-solución-de-problemas-faq)
+* [Buenas prácticas de Git](#-buenas-prácticas-de-git)
+
+---
+
+## ✅ Requisitos
+
+* **Node.js**: 18.x o 20.x LTS recomendado
+* **npm** 10+ o **yarn** 1.x
+* **Java JDK** 17 (recomendado para Android Gradle Plugin moderno)
+* **Android Studio** con SDKs y emulador (para Android)
+* **Xcode** 15+ (solo macOS, para iOS)
+* **CocoaPods** (solo iOS): `sudo gem install cocoapods`
+
+> Verifica tus versiones:
 
 ```bash
-# using npm
-npm start
-
-# OR using Yarn
-yarn start
+node -v
+npm -v
+java -version
 ```
 
-## Step 2: Start your Application
+---
 
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
+## 🧰 Tecnologías
 
-### For Android
+* React Native (CLI)
+* TypeScript
+* Firebase (Auth, Firestore, Storage)
+* Gradle / Android SDK
+* Xcode + CocoaPods (iOS)
+
+---
+
+## 🗂 Estructura del proyecto
+
+```
+congresocontactos/
+├── android/
+├── ios/
+├── src/
+│   ├── presentation/
+│   ├── domain/
+│   ├── data/
+│   └── ...
+├── App.tsx
+├── package.json
+├── tsconfig.json
+├── babel.config.js
+└── README.md
+```
+
+---
+
+## 🔐 Configuración de Firebase
+
+### Archivos necesarios
+
+* **Android**: `android/app/google-services.json`
+* **iOS**: `ios/GoogleService-Info.plist`
+
+> Si estos archivos no están en el repo, descárgalos desde tu proyecto de Firebase y colócalos en las rutas indicadas.
+
+### Dependencias típicas
+
+En `package.json` verás librerías como:
+
+* `@react-native-firebase/app`, `@react-native-firebase/auth`, `@react-native-firebase/firestore`, `@react-native-firebase/storage`
+
+> **Importante (Android)**: Asegúrate que `android/build.gradle` y `android/app/build.gradle` tengan los plugins de Google Services y Firebase. En iOS, corre `pod install`.
+
+---
+
+## ⬇️ Instalación (ZIP o Git)
+
+### Opción A: Descargar ZIP
+
+1. Ve al repo en GitHub → **Code** → **Download ZIP**.
+2. Extrae el ZIP.
+3. Abre una terminal en la carpeta del proyecto.
+
+### Opción B: Clonar con Git
 
 ```bash
-# using npm
+git clone https://github.com/LN42352339/congresocontactos.git
+cd congresocontactos
+```
+
+### Instalar dependencias (obligatorio en cualquier máquina)
+
+```bash
+npm install
+# o
+yarn install
+```
+
+---
+
+## 🖥 Configuración por sistema operativo
+
+### Windows
+
+1. Instala **Android Studio** y durante el setup marca:
+
+   * Android SDK
+   * Android SDK Platform
+   * Android Virtual Device
+2. Configura variables de entorno (si es necesario):
+
+   * `ANDROID_HOME` → `C:\Users\TU_USUARIO\AppData\Local\Android\Sdk`
+   * Agrega a `PATH`:
+
+     * `%ANDROID_HOME%\platform-tools`
+     * `%ANDROID_HOME%\emulator`
+3. Conecta un dispositivo Android con **depuración USB** o crea un **AVD** en Android Studio.
+
+### macOS
+
+1. Instala **Xcode** desde App Store y acepta licencias:
+
+   ```bash
+   sudo xcode-select --switch /Applications/Xcode.app
+   sudo xcodebuild -runFirstLaunch
+   ```
+2. Instala **CocoaPods**:
+
+   ```bash
+   sudo gem install cocoapods
+   ```
+3. Instala pods del proyecto iOS:
+
+   ```bash
+   cd ios && pod install && cd ..
+   ```
+4. Instala **Android Studio** si también compilarás para Android.
+
+### Linux
+
+1. Instala **Android Studio** y SDKs.
+2. Variables de entorno en `~/.bashrc` o `~/.zshrc`:
+
+   ```bash
+   export ANDROID_HOME="$HOME/Android/Sdk"
+   export PATH="$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator"
+   ```
+3. Usa dispositivo físico o emulador para Android.
+
+---
+
+## 🏃 Comandos útiles (scripts)
+
+En la raíz del proyecto:
+
+```bash
+# Arrancar Metro bundler
+npm run start
+
+# Ejecutar Android (emulador o dispositivo)
 npm run android
 
-# OR using Yarn
-yarn android
-```
-
-### For iOS
-
-```bash
-# using npm
+# Ejecutar iOS (solo macOS)
 npm run ios
 
-# OR using Yarn
-yarn ios
+# Limpiar cache de Metro
+npm run reset-cache
+
+# (Opcional) Limpiar Android Gradle
+cd android && ./gradlew clean && cd ..
 ```
 
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
+> Si usas **yarn**, reemplaza `npm run` por `yarn` (ej: `yarn android`).
 
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
+---
 
-## Step 3: Modifying your App
+## ▶️ Ejecutar la app
 
-Now that you have successfully run the app, let's modify it.
+### Android
 
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
+```bash
+npm run android
+```
 
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
+* Asegúrate de tener un emulador abierto desde Android Studio **o** un dispositivo con **depuración USB** activada.
 
-## Congratulations! :tada:
+### iOS (macOS)
 
-You've successfully run and modified your React Native App. :partying_face:
+```bash
+# 1) Instalar pods (solo la primera vez o cuando cambian librerías nativas)
+cd ios && pod install && cd ..
 
-### Now what?
+# 2) Ejecutar\ nnpm run ios
+```
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
+* También puedes abrir `ios/NombreDelProyecto.xcworkspace` en Xcode y ejecutar con el botón ▶️.
 
-# Troubleshooting
+---
 
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+## 🛠 Solución de problemas (FAQ)
 
-# Learn More
+**1) `Cannot find entry file index.js` o errores raros de bundler**
 
-To learn more about React Native, take a look at the following resources:
+```bash
+npm run reset-cache
+```
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+**2) Error iOS: `No such file or directory: Pods/…`**
+
+* Corre `cd ios && pod install && cd ..`
+* Si falla, prueba `pod repo update` y luego `pod install`.
+
+**3) Error Android: `SDK location not found`**
+
+* Configura `ANDROID_HOME` y añade `platform-tools` y `emulator` al `PATH`.
+* Verifica en Android Studio → **SDK Manager** la ruta del SDK.
+
+**4) Error Gradle o compilación en Android**
+
+```bash
+cd android
+./gradlew clean
+cd ..
+```
+
+* Verifica que tienes **JDK 17**.
+
+**5) iOS: Problemas de firma (signing)**
+
+* Abre el workspace en Xcode → **Signing & Capabilities** → selecciona tu **Team** y un **Bundle Identifier** único.
+
+**6) Firebase no conecta**
+
+* Verifica que los archivos `google-services.json` (Android) y `GoogleService-Info.plist` (iOS) estén en las rutas correctas.
+* Revisa que el **Bundle ID** (iOS) y **ApplicationId** (Android) coincidan con los de Firebase.
+
+**7) Error M1/M2/M3/M4 con pods**
+
+```bash
+sudo arch -x86_64 gem install ffi
+cd ios && arch -x86_64 pod install && cd ..
+```
+
+*(Solo si usas terminal en modo Rosetta; muchas veces ya no es necesario en macOS modernos)*
+
+**8) El proyecto compila en una máquina pero no en otra**
+
+* Asegúrate de correr `npm install` en cada máquina.
+* Borra caches: `npm run reset-cache`.
+* En iOS, borra Derived Data desde Xcode (Window → Projects → Derived Data → Delete).
+
+---
+
+## 🌿 Buenas prácticas de Git
+
+* No subir `node_modules/`, `ios/Pods/`, `android/.gradle/` (ya se manejan con `.gitignore`).
+* Commits descriptivos:
+
+```bash
+git add .
+git commit -m "feat: login por número + Firebase Auth"
+git push origin main
+```
+
+* Usa ramas para nuevas features: `feat/login`, `fix/auth`, `chore/ci`.
+
+---
+
+## 📄 Licencia
+
+Este proyecto es de uso privado del autor a menos que se indique lo contrario en el repositorio.
+
+---
+
+## 🧩 Contacto / Ayuda
+
+Si tienes problemas al ejecutar el proyecto, abre un **Issue** en GitHub o contacta al mantenedor.

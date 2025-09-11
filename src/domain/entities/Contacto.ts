@@ -8,4 +8,5 @@ export interface Contacto {
   telefono: string;
   area: string;
   cargo: string;
+  operador?: string;
 }

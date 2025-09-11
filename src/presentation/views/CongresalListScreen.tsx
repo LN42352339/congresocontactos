@@ -1,4 +1,5 @@
-// src/presentation/views/ContactListScreen.tsx
+// src/presentation/views/CongresalListScreen.tsx
+// src/presentation/views/CongresalListScreen.tsx
 import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import {
   View, Text, FlatList, StyleSheet, TouchableOpacity,
@@ -9,16 +10,14 @@ import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-type Contacto = {
+type Congresal = {
   id: string;
   primerNombre?: unknown;
   segundoNombre?: unknown;
   primerApellido?: unknown;
   segundoApellido?: unknown;
   telefono?: unknown;
-  area?: unknown;
-  cargo?: unknown;
-  operador?: unknown;
+  operador?: unknown; // <-- lo dejamos en el tipo por si existe en BD, pero no lo mostramos
 };
 
 const s = (v: unknown) => (v == null ? '' : String(v)).trim();
@@ -27,46 +26,47 @@ const toPeru9 = (raw: unknown) => {
   return digits.slice(-9);
 };
 
-const ContactListScreen = () => {
-  const [contactos, setContactos] = useState<Contacto[]>([]);
+const CongresalListScreen = () => {
+  const [items, setItems] = useState<Congresal[]>([]);
   const [busqueda, setBusqueda] = useState('');
-  const [filtrados, setFiltrados] = useState<Contacto[]>([]);
+  const [filtrados, setFiltrados] = useState<Congresal[]>([]);
 
+  // Suscripción a "congresales"
   useEffect(() => {
-    const unsub = firestore().collection('contactos').onSnapshot(
-      (snap) => {
-        const data = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as Contacto[];
-        setContactos(data);
-        setFiltrados(data);
-      },
-      (err) => {
-        console.error('[contactos] snapshot error:', err);
-        Alert.alert('Error', 'No se pudieron cargar los contactos.');
-      },
-    );
+    const unsub = firestore()
+      .collection('congresales')
+      .onSnapshot(
+        (snap) => {
+          const data = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as Congresal[];
+          setItems(data);
+          setFiltrados(data);
+        },
+        (err) => {
+          console.error('[congresales] snapshot error:', err);
+          Alert.alert('Error', 'No se pudieron cargar los contactos congresales.');
+        },
+      );
     return () => unsub();
   }, []);
 
+  // Filtro memo (ya NO incluye operador)
   const filtradosMemo = useMemo(() => {
     const t = busqueda.toLowerCase();
-    if (!t) return contactos;
-    return contactos.filter((c) =>
-      [
-        s(c.primerNombre), s(c.segundoNombre),
-        s(c.primerApellido), s(c.segundoApellido),
-        s(c.telefono), s(c.area), s(c.cargo), s(c.operador),
-      ]
+    if (!t) return items;
+    return items.filter((c) =>
+      [s(c.primerNombre), s(c.segundoNombre), s(c.primerApellido), s(c.segundoApellido), s(c.telefono)]
         .filter(Boolean)
         .join(' ')
         .toLowerCase()
         .includes(t),
     );
-  }, [busqueda, contactos]);
+  }, [busqueda, items]);
 
   useEffect(() => {
     setFiltrados(filtradosMemo);
   }, [filtradosMemo]);
 
+  // Llamar
   const llamar = useCallback((numero: unknown) => {
     const num9 = toPeru9(numero);
     if (num9.length !== 9) {
@@ -78,6 +78,7 @@ const ContactListScreen = () => {
     );
   }, []);
 
+  // WhatsApp con fallback
   const abrirWhatsApp = useCallback((numero: unknown) => {
     const num9 = toPeru9(numero);
     if (num9.length !== 9) {
@@ -93,6 +94,7 @@ const ContactListScreen = () => {
     );
   }, []);
 
+  // Cerrar sesión
   const cerrarSesion = useCallback(async () => {
     try {
       await auth().signOut();
@@ -101,44 +103,38 @@ const ContactListScreen = () => {
     }
   }, []);
 
-  // Componente para líneas
   const LineaConIcono = ({
-    iconName, iconColor, text, isPhone = false,
-  }: { iconName: string; iconColor: string; text: string; isPhone?: boolean }) => (
+    iconName, iconColor, text,
+  }: { iconName: string; iconColor: string; text: string }) => (
     <View style={styles.line}>
       <Icon name={iconName} size={16} color={iconColor} style={styles.lineIcon} />
-      <Text style={[styles.lineText, isPhone && styles.phoneText]}>{text}</Text>
+      <Text style={styles.lineText}>{text}</Text>
     </View>
   );
 
-  const renderItem = useCallback(({ item }: { item: Contacto }) => {
+  const renderItem = useCallback(({ item }: { item: Congresal }) => {
     try {
-      const nombre = [
-        s(item.primerNombre), s(item.segundoNombre),
-        s(item.primerApellido), s(item.segundoApellido),
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toUpperCase() || '(SIN NOMBRE)';
+      const nombre =
+        [s(item.primerNombre), s(item.segundoNombre), s(item.primerApellido), s(item.segundoApellido)]
+          .filter(Boolean)
+          .join(' ')
+          .toUpperCase() || '(SIN NOMBRE)';
 
       const telLabel = toPeru9(item.telefono) || '—';
-      const areaLabel = s(item.area);
-      const cargoLabel = s(item.cargo);
 
       return (
         <View style={styles.card}>
           <Text style={styles.name}>{nombre}</Text>
 
-          {/* Teléfono con estilo especial */}
-          <LineaConIcono iconName="phone" iconColor="#333" text={telLabel} isPhone />
-
-          {areaLabel ? <LineaConIcono iconName="map-marker" iconColor="#0E4E99" text={areaLabel} /> : null}
-          {cargoLabel ? <LineaConIcono iconName="briefcase" iconColor="#0E4E99" text={cargoLabel} /> : null}
+          <LineaConIcono iconName="phone" iconColor="#333" text={telLabel} />
+          {/* ⬇️ Se eliminó la línea del operador (icono 'signal' y texto) */}
 
           <View style={styles.buttons}>
             <TouchableOpacity
               onPress={() => llamar(item.telefono)}
               style={[styles.btn, styles.btnPrimary, styles.btnRightGap]}
+              accessibilityRole="button"
+              accessibilityLabel="Llamar"
             >
               <Icon name="phone" size={20} color="#fff" />
               <Text style={styles.btnText}>LLAMAR</Text>
@@ -147,6 +143,8 @@ const ContactListScreen = () => {
             <TouchableOpacity
               onPress={() => abrirWhatsApp(item.telefono)}
               style={[styles.btn, styles.btnWhatsapp]}
+              accessibilityRole="button"
+              accessibilityLabel="Enviar WhatsApp"
             >
               <Icon name="whatsapp" size={20} color="#fff" />
               <Text style={styles.btnText}>WHATSAPP</Text>
@@ -155,7 +153,7 @@ const ContactListScreen = () => {
         </View>
       );
     } catch (e) {
-      console.error('renderItem contacto error:', e, item);
+      console.error('renderItem congresal error:', e, item);
       return (
         <View style={styles.card}>
           <Text style={styles.name}>(CONTACTO INVÁLIDO)</Text>
@@ -166,27 +164,31 @@ const ContactListScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
-        <Icon name="address-book" size={22} color="#fff" style={styles.headerIcon} />
-        <Text style={styles.headerTitle}>DIRECTORIO PARLAMENTARIO</Text>
+        <Icon name="users" size={22} color="#fff" style={styles.headerIcon} />
+        <Text style={styles.headerTitle}>CONTACTOS CONGRESALES</Text>
       </View>
 
-      <TouchableOpacity onPress={cerrarSesion} style={styles.logoutBtn}>
+      {/* Botón cerrar sesión */}
+      <TouchableOpacity onPress={cerrarSesion} style={styles.logoutBtn} accessibilityRole="button">
         <Text style={styles.logoutText}>CERRAR SESIÓN</Text>
       </TouchableOpacity>
 
+      {/* Buscador (placeholder actualizado) */}
       <TextInput
         style={styles.input}
-        placeholder="BUSCAR POR NOMBRE, ÁREA, CARGO O TELÉFONO..."
+        placeholder="BUSCAR POR NOMBRE O TELÉFONO"
         value={busqueda}
         onChangeText={setBusqueda}
         placeholderTextColor="#888"
-        selectionColor="#0E4E99"
+        selectionColor="#a30000"
         autoCapitalize="none"
         autoCorrect={false}
         returnKeyType="search"
       />
 
+      {/* Lista */}
       {filtrados.length === 0 ? (
         <Text style={styles.emptyText}>NO HAY CONTACTOS.</Text>
       ) : (
@@ -195,6 +197,7 @@ const ContactListScreen = () => {
           keyExtractor={(i) => String(i.id)}
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
+          // ⚙️ Rendimiento / estabilidad
           initialNumToRender={12}
           maxToRenderPerBatch={12}
           updateCellsBatchingPeriod={50}
@@ -211,30 +214,46 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 14, backgroundColor: '#f2f2f7' },
 
   header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    padding: 16, backgroundColor: '#0E4E99', borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    backgroundColor: '#a30000',
+    borderRadius: 10,
+    elevation: 3,
+    marginBottom: 0,
   },
   headerIcon: { marginRight: 8 },
   headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#fff' },
 
   logoutBtn: { alignSelf: 'flex-end', marginVertical: 10 },
-  logoutText: { color: '#0E4E99', fontWeight: 'bold' },
+  logoutText: { color: '#a30000', fontWeight: 'bold' },
 
   input: {
-    backgroundColor: '#fff', borderWidth: 1, borderColor: '#ddd',
-    padding: 10, borderRadius: 10, marginBottom: 10, fontSize: 14, color: '#000',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 10,
+    fontSize: 14,
+    color: '#000',
   },
 
   card: {
-    backgroundColor: '#fff', padding: 14, borderRadius: 10, marginBottom: 10,
-    borderWidth: 1, borderColor: '#ddd',
+    backgroundColor: '#fff',
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    elevation: 1,
   },
-  name: { fontSize: 15, fontWeight: 'bold', color: '#0E4E99' },
+  name: { fontSize: 15, fontWeight: 'bold', color: '#a30000' },
 
   line: { position: 'relative', paddingLeft: 24, marginTop: 6 },
   lineIcon: { position: 'absolute', left: 0, top: 1 },
-  lineText: { fontSize: 13, color: '#333', flexShrink: 1 },
-  phoneText: { fontSize: 18, color: '#000' }, // Teléfono más grande
+  lineText: { fontSize: 18, color: '#333', flexShrink: 1 },
 
   buttons: { flexDirection: 'row', marginTop: 12 },
   btn: {
@@ -242,11 +261,11 @@ const styles = StyleSheet.create({
     padding: 8, borderRadius: 8,
   },
   btnRightGap: { marginRight: 8 },
-  btnPrimary: { backgroundColor: '#0E4E99' },
+  btnPrimary: { backgroundColor: '#a30000' },
   btnWhatsapp: { backgroundColor: '#25D366' },
   btnText: { color: '#fff', fontWeight: 'bold', marginLeft: 4, fontSize: 13 },
 
   emptyText: { textAlign: 'center', color: '#888', marginTop: 20 },
 });
 
-export default ContactListScreen;
+export default CongresalListScreen;

@@ -1,35 +1,21 @@
-import React, {useEffect} from 'react';
-import {View, Text, Alert, StyleSheet, TouchableOpacity} from 'react-native';
-import {auth} from '../../core/config/firebase';
-import {signOut} from 'firebase/auth';
-import {useNavigation, CommonActions} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../navigation/AppNavigator';
-
-type DashboardNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'Dashboard'
->;
+// src/presentation/views/DashboardScreen.tsx
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import auth from '@react-native-firebase/auth';
+import { useNavigation, CommonActions } from '@react-navigation/native';
 
 const DashboardScreen = () => {
-  const navigation = useNavigation<DashboardNavigationProp>();
-  const user = auth.currentUser;
+  const navigation = useNavigation();
+  const user = auth().currentUser;
   const phone = user?.email?.split('@')[0] || 'Invitado';
-
-  // Si no hay usuario logueado, redirigir al Login
-  useEffect(() => {
-    if (!user) {
-      navigation.replace('Login');
-    }
-  }, [user, navigation]);
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await auth().signOut();
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
-          routes: [{name: 'Login'}],
+          routes: [{ name: 'Login' as never }], // 👈 forzamos el tipo
         }),
       );
     } catch (error) {
@@ -46,7 +32,7 @@ const DashboardScreen = () => {
       <Text style={styles.info}>UID: {user?.uid}</Text>
 
       <TouchableOpacity
-        onPress={() => navigation.navigate('ContactList')}
+        onPress={() => navigation.navigate('Main' as never)} // 👈 ahora apunta a "Main"
         style={styles.navBtn}>
         <Text style={styles.navText}>Ir al Directorio</Text>
       </TouchableOpacity>
