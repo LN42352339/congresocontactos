@@ -1,21 +1,36 @@
+// --- Plugins ---
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 apply plugin: "com.google.gms.google-services"
 
+// --- Imports para leer key.properties ---
+import java.util.Properties
+import java.io.FileInputStream
+
+// (Deja la config de React tal como la tengas)
 react { /* (deja como está) */ }
 
-def enableProguardInReleaseBuilds = true   // opcional: activo para optimizar
+// Opcionales (puedes ajustar)
+def enableProguardInReleaseBuilds = true
 def jscFlavor = 'org.webkit:android-jsc:+'
+
+// --- Cargar credenciales desde android/key.properties ---
+def keystorePropertiesFile = rootProject.file("key.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
 
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.directorio"                 // AJUSTA si tu paquete es otro
+    namespace "com.directorio" // Ajusta si tu paquete real es otro
+
     defaultConfig {
-        applicationId "com.directorio"         // AJUSTA si tu paquete es otro
+        applicationId "com.directorio" // Ajusta si tu paquete real es otro
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 2
@@ -23,43 +38,55 @@ android {
         multiDexEnabled true
     }
 
-    signingConfigs {
-        debug {
-            storeFile file('debug.keystore')
-            storePassword 'android'
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
-        }
-        // 🔐 Usa las variables definidas en gradle.properties
-        release {
-            storeFile file(MYAPP_UPLOAD_STORE_FILE)
-            storePassword MYAPP_UPLOAD_STORE_PASSWORD
-            keyAlias MYAPP_UPLOAD_KEY_ALIAS
-            keyPassword MYAPP_UPLOAD_KEY_PASSWORD
-
-            // Si te diera "Could not get unknown property MYAPP_...":
-            // cambia la línea de arriba por:
-            // storeFile file("my-release-key.jks")
-            // y deja las demás igual.
-        }
+    // --- Firmas ---
+   signingConfigs {
+  debug {
+    storeFile file('debug.keystore')
+    storePassword 'android'
+    keyAlias 'androiddebugkey'
+    keyPassword 'android'
+  }
+  release {
+    if (keystorePropertiesFile.exists()) {
+      // 👇 fuerza a resolver respecto a android/app
+      storeFile file("$projectDir/" + keystoreProperties["storeFile"])
+      storePassword keystoreProperties["storePassword"]
+      keyAlias keystoreProperties["keyAlias"]
+      keyPassword keystoreProperties["keyPassword"]
     }
+  }
+}
 
+
+    // --- Tipos de build ---
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // ✅ ahora sí firma con tu keystore de release
+            // Firma con tu keystore de release
             signingConfig signingConfigs.release
 
-            // Optimización (puedes desactivar si algo falla para probar)
+            // Optimización (si algo falla, puedes poner false en ambos para probar)
             minifyEnabled enableProguardInReleaseBuilds
-            shrinkResources true
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            shrinkResources enableProguardInReleaseBuilds
+
+            // ProGuard/R8
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
     }
+
+    // (Opcional) Si usas Java 17+ en el proyecto, asegúrate de estas opciones:
+    // compileOptions {
+    //     sourceCompatibility JavaVersion.VERSION_17
+    //     targetCompatibility JavaVersion.VERSION_17
+    // }
+    // kotlinOptions {
+    //     jvmTarget = "17"
+    // }
 }
 
+// --- Dependencias ---
 dependencies {
     implementation("com.facebook.react:react-android")
     if (hermesEnabled.toBoolean()) {
@@ -69,5 +96,6 @@ dependencies {
     }
 }
 
+// --- Autolinking RN & otros scripts ---
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
